@@ -18,7 +18,12 @@ A = 0
 
 def main():
     # login to voicemeeter
-    vmr_login()
+    global vmr
+    vmr = voicemeeter.remote(KIND)
+    try:
+        vmr.login()
+    except VMRDriverError:
+        voicemeeter.launch(KIND)
     
     # create main gui window
     root = Tk()
@@ -54,23 +59,12 @@ def any_click(name, ent):
         ent.insert(0, "who the hell cares?")
     elif name == "C":
         ent.delete(0, END)
+    elif name == "=":
+        vmr.set(ent.get(), True)
     else:
         current = ent.get()
         ent.delete(0, END)
         ent.insert(0, str(current) + " " + str(name))
-
-
-def vmr_login():
-    global vmr
-    vmr = voicemeeter.remote(KIND)
-    try:
-        vmr.login()
-    except VMRDriverError:
-        voicemeeter.launch(KIND)
-    
-
-def vmr_logout():
-    vmr.logout()
     
     
 if __name__ == "__main__":
