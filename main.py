@@ -58,7 +58,7 @@ def main():
     
 
 def task():
-    print("HI")
+    print("hey is this thing loopin'?")
     root.after(10, task)
 
 
