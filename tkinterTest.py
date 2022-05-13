@@ -26,6 +26,7 @@ def main():
         voicemeeter.launch(KIND)
     
     # create main gui window
+    global root
     root = Tk()
     root.title("super duper calculator")
     
@@ -48,10 +49,18 @@ def main():
             button_list[i].grid(row=_row+1, column=_column)
             i += 1
                
-                        
-    # main loop
+    
+    # my loop
+    root.after(10, task)
+
+    # gui loop
     root.mainloop()
     
+
+def task():
+    print("HI")
+    root.after(10, task)
+
 
 def any_click(name, ent):
     if name == "!=":
