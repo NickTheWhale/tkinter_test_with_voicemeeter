@@ -2,7 +2,9 @@ from asyncio import sleep
 from asyncio.windows_events import NULL
 from re import I
 from tkinter import *
+from tkinter import messagebox
 
+import serial
 from numpy import pad
 from voicemeeter import *
 import voicemeeter
@@ -11,10 +13,10 @@ from voicemeeter.errors import VMRDriverError
 # constants
 KIND = 'potato'
 BUTTON_SIZE = 5
-BUTTON_NAMES = ["C", "+/-", "%", "/", "7", "8", "9", "*", "4", "5", "6", "-", "1", "2", "3", "+", "0", ".", "=", "!="]
+BUTTON_NAMES = ["C", "+/-", "%", "/", "7", "8", "9", "*", "4", "5", "6", "-", "1", "2", "connect", "+", "0", ".", "=", "!="]
+# BUTTON_NAMES = "123456789abcdefghijk"
 
 A = 0
-
 
 def main():
     # login to voicemeeter
@@ -51,30 +53,41 @@ def main():
                
     
     # my loop
-    root.after(10, task)
+    # root.after(10, task)
+    global arduino
+    arduino = serial.Serial(port="COM38", baudrate=115200, timeout=0)
+    
+    # root.after(10, lambda arduino=arduino: print_serial(arduino))
+    root.after(10, print_serial)
 
     # gui loop
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
     
 
 def task():
-    print("hey is this thing loopin'?")
-    root.after(10, task)
+    print("hey is this thing loopin'?", time.time())
+    root.after(1000, task)
 
+
+def print_serial():
+    if arduino.in_waiting > 0:
+        data = arduino.readline().decode('utf-8').rstrip()
+        data = data.strip('<').strip('>').split(',')
+        # print("data:", data)
+    root.after(10, print_serial)
+                
 
 def any_click(name, ent):
-    if name == "!=":
-        ent.delete(0, END)
-        ent.insert(0, "who the hell cares?")
-    elif name == "C":
-        ent.delete(0, END)
-    elif name == "=":
-        vmr.set(ent.get(), True)
-    else:
-        current = ent.get()
-        ent.delete(0, END)
-        ent.insert(0, str(current) + " " + str(name))
-    
+    print(f'name: {name} ent: {ent}')
+
+
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        print("vmr logout: ", vmr.logout())
+        print("arduino close: ", arduino.close())
+        root.destroy()
+
     
 if __name__ == "__main__":
     main()
