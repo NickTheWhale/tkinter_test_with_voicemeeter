@@ -1,2 +1,2 @@
 # vmr_utility
-![Screenshot](screenshot.png)
+![Screenshot](gui_paint_mockup.png)
