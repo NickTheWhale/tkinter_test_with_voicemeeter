@@ -3,10 +3,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 
-from numpy import var
-
 # constants
-BD_WIDTH = 5
+BD_WIDTH = 3
 
 
 class App(tk.Tk):
@@ -32,23 +30,23 @@ class App(tk.Tk):
         buttons_frame.grid(column=4, row=0)
 
         slider1_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="flat")
+            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
         slider1_frame.grid(column=0, row=1)
 
         slider2_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="raised")
+            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
         slider2_frame.grid(column=1, row=1)
 
         slider3_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="sunken")
+            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
         slider3_frame.grid(column=2, row=1)
 
         slider4_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="solid")
+            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
         slider4_frame.grid(column=3, row=1)
 
         slider5_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="ridge")
+            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
         slider5_frame.grid(column=4, row=1)
 
         slider6_frame = ttk.Frame(
@@ -57,7 +55,7 @@ class App(tk.Tk):
 
         options_frame = ttk.Frame(
             self.mainframe, borderwidth=BD_WIDTH, relief="groove")
-        options_frame.grid(column=0, row=2, columnspan=5)
+        options_frame.grid(column=1, row=2, columnspan=5, sticky=NSEW)
 
         # test labels
         knob_label = ttk.Label(knob_frame, text="knobs")
@@ -66,9 +64,10 @@ class App(tk.Tk):
         buttons_label = ttk.Label(buttons_frame, text="buttons")
         buttons_label.grid(column=0, row=0)
 
-        # buttons
-        slid1 = tk.Button(slider1_frame, text="slider", height=20)
-        slid1.grid(column=0, row=0, rowspan=5)
+        self.slider_value = 0
+        slider1 = ttk.Scale(slider1_frame, orient='vertical',
+                            length=300, from_=12, to=-60, command=self.slider_moved)
+        slider1.grid(column=0, row=0, rowspan=5)
 
         self.A1checkvar = IntVar()
 
@@ -105,11 +104,24 @@ class App(tk.Tk):
 
         # port box
         self.com_port = StringVar()
-        com_select = ttk.Combobox(options_frame, textvariable=self.com_port)
-        com_select.grid(column=0, row=0)
-        
-        connect_button = ttk.Button(options_frame, text="Connect", command=self.on_connect)
+        self.com_select = ttk.Combobox(
+            options_frame, textvariable=self.com_port)
+        self.com_select.grid(column=0, row=0)
+
+        connect_button = ttk.Button(
+            options_frame, text="Connect", command=self.on_connect)
         connect_button.grid(column=1, row=0)
+
+        # resizing
+        self.mainframe.columnconfigure(0, weight=1, minsize=150)
+        self.mainframe.columnconfigure(1, weight=1, minsize=150)
+        self.mainframe.columnconfigure(2, weight=1, minsize=150)
+        self.mainframe.columnconfigure(3, weight=1, minsize=150)
+        self.mainframe.columnconfigure(4, weight=1, minsize=150)
+        self.mainframe.columnconfigure(5, weight=1, minsize=150)
+        self.mainframe.rowconfigure(0, weight=1, minsize=100)
+        self.mainframe.rowconfigure(1, weight=1, minsize=100)
+        self.mainframe.rowconfigure(2, weight=1, minsize=100)
 
     def onA1(self):
         print(
@@ -123,9 +135,17 @@ class App(tk.Tk):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.__is_running = False
             self.destroy()
-            
+
     def on_connect(self):
         print(self.com_port.get())
+
+    def add_port(self, ports):
+        """
+        Set port drop down options 
+        :param ports: list of COM ports
+        :type ports: String List
+        """
+        self.com_select['value'] = ports
 
     @property
     def is_running(self):
@@ -138,8 +158,6 @@ class App(tk.Tk):
         """
         return self.__is_running
 
-    def button1_callback(self):
-        print("button 1")
-
-    def button2_callback(self):
-        print("button 2")
+    def slider_moved(self, val):
+        print(val)
+        # print(self.slider_value)
