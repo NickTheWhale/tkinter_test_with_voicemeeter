@@ -3,6 +3,9 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 
+import serial
+from serial import SerialException
+
 # constants
 BD_WIDTH = 3
 
@@ -54,8 +57,8 @@ class App(tk.Tk):
         slider6_frame.grid(column=5, row=1)
 
         options_frame = ttk.Frame(
-            self.mainframe, borderwidth=BD_WIDTH, relief="groove")
-        options_frame.grid(column=1, row=2, columnspan=5, sticky=NSEW)
+            self.mainframe, borderwidth=BD_WIDTH, relief="flat")
+        options_frame.grid(column=1, row=2, columnspan=5, sticky=E)
 
         # test labels
         knob_label = ttk.Label(knob_frame, text="knobs")
@@ -106,11 +109,15 @@ class App(tk.Tk):
         self.com_port = StringVar()
         self.com_select = ttk.Combobox(
             options_frame, textvariable=self.com_port)
-        self.com_select.grid(column=0, row=0)
+        self.com_select.grid(column=0, row=0, sticky=E)
+
+        self.com_baud = StringVar()
+        self.com_baud = ttk.Combobox(options_frame, textvariable=self.com_baud)
+        self.com_baud.grid(column=1, row=0, sticky=E)
 
         connect_button = ttk.Button(
             options_frame, text="Connect", command=self.on_connect)
-        connect_button.grid(column=1, row=0)
+        connect_button.grid(column=2, row=0, sticky=E)
 
         # resizing
         self.mainframe.columnconfigure(0, weight=1, minsize=150)
@@ -121,7 +128,7 @@ class App(tk.Tk):
         self.mainframe.columnconfigure(5, weight=1, minsize=150)
         self.mainframe.rowconfigure(0, weight=1, minsize=100)
         self.mainframe.rowconfigure(1, weight=1, minsize=100)
-        self.mainframe.rowconfigure(2, weight=1, minsize=100)
+        self.mainframe.rowconfigure(2, weight=1, minsize=30)
 
     def onA1(self):
         print(
@@ -137,7 +144,21 @@ class App(tk.Tk):
             self.destroy()
 
     def on_connect(self):
-        print(self.com_port.get())
+        a_port = self.com_port.get()
+        a_baud = self.com_baud.get()
+        if a_baud == ' ':
+            a_baud = "9600"
+        print(
+            f'Connecting to {self.com_port.get()} at {self.com_baud.get()} baud')
+        try:
+            arduino = serial.Serial(port=a_port, baudrate=a_baud, timeout=0)
+            connected = True
+            print("Success")
+        except SerialException as e:
+            print(e)
+            connected = False
+        return connected
+        
 
     def add_port(self, ports):
         """
