@@ -1,34 +1,38 @@
-import tkinter
-from tkinter import *
-from tkinter import ttk
+from tkinter import Tk, Label, Button, StringVar
 
-def start():
-    b.configure(text='Stop', command=stop)
-    l['text'] = 'Working...'
-    global interrupt; interrupt = False
-    root.after(1, step)
-    
-def stop():
-    global interrupt; interrupt = True
-    
-def step(count=0):
-    p['value'] = count
-    if interrupt:
-        result(None)
-        return
-    root.after(100)  # next step in our operation; don't take too long!
-    if count == 20:  # done!
-        result(42)
-        return
-    root.after(1, lambda: step(count+1))
-    
-def result(answer):
-    p['value'] = 0
-    b.configure(text='Start!', command=start)
-    l['text'] = "Answer: " + str(answer) if answer else "No Answer"
-    
-f = ttk.Frame(root); f.grid()
-b = ttk.Button(f, text="Start!", command=start); b.grid(column=1, row=0, padx=5, pady=5)
-l = ttk.Label(f, text="No Answer"); l.grid(column=0, row=0, padx=5, pady=5)
-p = ttk.Progressbar(f, orient="horizontal", mode="determinate", maximum=20); 
-p.grid(column=0, row=1, padx=5, pady=5)
+class MyFirstGUI:
+    LABEL_TEXT = [
+        "This is our first GUI!",
+        "Actually, this is our second GUI.",
+        "We made it more interesting...",
+        "...by making this label interactive.",
+        "Go on, click on it again.",
+    ]
+    def __init__(self, master):
+        self.master = master
+        master.title("A simple GUI")
+
+        self.label_index = 0
+        self.label_text = StringVar()
+        self.label_text.set(self.LABEL_TEXT[self.label_index])
+        self.label = Label(master, textvariable=self.label_text)
+        self.label.bind("<Button-1>", self.cycle_label_text)
+        self.label.pack()
+
+        self.greet_button = Button(master, text="Greet", command=self.greet)
+        self.greet_button.pack()
+
+        self.close_button = Button(master, text="Close", command=master.quit)
+        self.close_button.pack()
+
+    def greet(self):
+        print("Greetings!")
+
+    def cycle_label_text(self, event):
+        self.label_index += 1
+        self.label_index %= len(self.LABEL_TEXT) # wrap around
+        self.label_text.set(self.LABEL_TEXT[self.label_index])
+
+root = Tk()
+my_gui = MyFirstGUI(root)
+root.mainloop()
