@@ -1,4 +1,6 @@
 import serial
+from serial import SerialException
+
 from voicemeeter import *
 import voicemeeter
 from voicemeeter.errors import VMRDriverError
@@ -7,6 +9,7 @@ from app import App
 
 # constants
 KIND = 'potato'
+arduino_is_connected = False
 
 
 def main():
@@ -18,14 +21,24 @@ def main():
     except VMRDriverError:
         voicemeeter.launch(KIND)
 
+    # serial loop
+    global arduino
+    # try:
+    arduino = serial.Serial(port="COM38", baudrate=115200, timeout=0)
+    arduino_is_connected = True
+    # except SerialException:
+    #     print("failed to connect to serial port")
+    # finally:
+    #     print("failed to connect to serial port")
+    #     arduino_is_connected = False
+
     # create global application object
     global app
     app = App("VMR Utility")
+    app.initialize_widgets()
 
-    # serial loop
-    global arduino
-    arduino = serial.Serial(port="COM38", baudrate=115200, timeout=0)
-    app.after(10, print_serial)
+    if arduino_is_connected:
+        app.after(10, print_serial)
 
     # gui loop
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
@@ -38,10 +51,11 @@ def task():
 
 
 def print_serial():
-    if arduino.in_waiting > 0:
-        data = arduino.readline().decode('utf-8').rstrip()
-        data = data.strip('<').strip('>').split(',')
-        print("data:", data)
+    if arduino_is_connected:
+        if arduino.in_waiting > 0:
+            data = arduino.readline().decode('utf-8').rstrip()
+            data = data.strip('<').strip('>').split(',')
+            print("data:", data)
     app.after(10, print_serial)
 
 
