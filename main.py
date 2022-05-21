@@ -1,5 +1,5 @@
-# import serial
-# from serial import SerialException
+import serial
+from serial import SerialException
 
 from voicemeeter import *
 import voicemeeter
@@ -13,12 +13,12 @@ KIND = 'potato'
 
 def main():
     # login to voicemeeter
-#     global vmr
-#     vmr = voicemeeter.remote(KIND)
-#     try:
-#         vmr.login()
-#     except VMRDriverError:
-#         voicemeeter.launch(KIND)
+    global vmr
+    vmr = voicemeeter.remote(KIND)
+    try:
+        vmr.login()
+    except VMRDriverError:
+        voicemeeter.launch(KIND)
 
     # serial loop
     # global arduino
