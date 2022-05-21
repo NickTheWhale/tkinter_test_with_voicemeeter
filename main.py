@@ -1,5 +1,5 @@
-import serial
-from serial import SerialException
+# import serial
+# from serial import SerialException
 
 from voicemeeter import *
 import voicemeeter
