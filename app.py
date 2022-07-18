@@ -1,93 +1,57 @@
 import tkinter as tk
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
-import serial
-from serial import SerialException
+import sv_ttk
 
-# constants
-BD_WIDTH = 3
+from slider import BusWidget, StripWidget
 
 
 class App(tk.Tk):
     def __init__(self, name="app"):
         super().__init__()
-        # private variables
-        self.__is_running = True
+        sv_ttk.set_theme("dark")
 
-        # create main gui window
-        self.title(name)
+        # custom title bar
+        self.overrideredirect(True)
+        self.geometry('+200+200')
+        
+        self.title_bar = ttk.Frame(self)
+        self.title_bar.grid(row=0, column=0, sticky="NSEW")
+        
+        self.close_button = ttk.Button(self.title_bar, text='X', command=self.on_closing)
+        self.close_button.grid(row=0, column=0, sticky="E")
+        
+        self._xwin = 0
+        self._ywin = 0
+        
+        self.title_bar.bind('<B1-Motion>', self.move_window)
+        self.title_bar.bind('<Button-1>', self.get_pos)
+        
+        # main frame
         self.mainframe = ttk.Frame(self)
-        self.mainframe.grid(row=0, column=0, sticky="NSEW")
+        self.mainframe.grid(row=1, column=0, sticky="NSEW")
         self.resizable(False, False)
-        
-        # build gui
-        self.build()
 
-    def build(self):
-        pass
+        # setup gui
+        self.setup()
 
-        # resizing
-        # self.mainframe.columnconfigure(0, weight=1, minsize=150)
-        # self.mainframe.columnconfigure(1, weight=1, minsize=150)
-        # self.mainframe.columnconfigure(2, weight=1, minsize=150)
-        # self.mainframe.columnconfigure(3, weight=1, minsize=150)
-        # self.mainframe.columnconfigure(4, weight=1, minsize=150)
-        # self.mainframe.columnconfigure(5, weight=1, minsize=150)
-        # self.mainframe.rowconfigure(0, weight=1, minsize=100)
-        # self.mainframe.rowconfigure(1, weight=1, minsize=100)
-        # self.mainframe.rowconfigure(2, weight=1, minsize=30)
+    def setup(self):
+        self._strip1 = StripWidget(1, master=self.mainframe, name='strip1', border=1).grid(row=0, column=0, padx=5, pady=10)
+        self._strip2 = StripWidget(2, master=self.mainframe, name='strip2', border=1).grid(row=0, column=1, padx=5, pady=10)
+        self._strip3 = StripWidget(3, master=self.mainframe, name='strip3', border=1).grid(row=0, column=2, padx=5, pady=10)
+        self._strip4 = StripWidget(4, master=self.mainframe, name='strip4', border=1).grid(row=0, column=3, padx=5, pady=10)
+                
+        self._bus1 = BusWidget(5, master=self.mainframe, name='bus1', border=1).grid(row=0, column=4, padx=5, pady=10, sticky="S")
+        self._bus2 = BusWidget(6, master=self.mainframe, name='bus2', border=1).grid(row=0, column=5, padx=5, pady=10, sticky="S")
 
-    def onA1(self):
-        print(
-            f'value: {self.A1checkvar.get()} type: {type(self.A1checkvar.get())}')
+    def get_pos(self, event):
+        self._xwin = event.x
+        self._ywin = event.y
 
+    def move_window(self, event):
+        self.geometry(f'+{event.x_root-self._xwin}+{event.y_root-self._ywin}')
+            
     def on_closing(self):
-        """
-        Called on application exit. Prompts user if they want to quit
-        and sets "is_running" flag to false
-        """
+        """program exit callback"""
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            self.__is_running = False
             self.destroy()
-
-    def on_connect(self):
-        a_port = self.com_port.get()
-        a_baud = self.com_baud.get()
-        if a_baud == ' ':
-            a_baud = "9600"
-        print(
-            f'Connecting to {self.com_port.get()} at {self.com_baud.get()} baud')
-        try:
-            arduino = serial.Serial(port=a_port, baudrate=a_baud, timeout=0)
-            connected = True
-            print("Success")
-        except SerialException as e:
-            print(e)
-            connected = False
-        return connected
-        
-
-    def add_port(self, ports):
-        """
-        Set port drop down options 
-        :param ports: list of COM ports
-        :type ports: String List
-        """
-        self.com_select['value'] = ports
-
-    @property
-    def is_running(self):
-        """
-        Returns true if user has requested to close application.
-        Returns false if otherwise
-
-        :return: application state
-        :rtype: Bool
-        """
-        return self.__is_running
-
-    def slider_moved(self, val):
-        print(val)
-        # print(self.slider_value)

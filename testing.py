@@ -1,41 +1,74 @@
-from tkinter import Tk, Label, Button, StringVar
+#from tkinter import *  # PEP8: `import *` is not preferred
+import tkinter as tk
 
+# --- classes ---
 
-class MyFirstGUI:
-    LABEL_TEXT = [
-        "This is our first GUI!",
-        "Actually, this is our second GUI.",
-        "We made it more interesting...",
-        "...by making this label interactive.",
-        "Go on, click on it again.",
-    ]
+# empty
 
-    def __init__(self, master):
-        self.master = master
-        master.title("A simple GUI")
+# --- functions ---
 
-        self.label_index = 0
-        self.label_text = StringVar()
-        self.label_text.set(self.LABEL_TEXT[self.label_index])
-        self.label = Label(master, textvariable=self.label_text)
-        self.label.bind("<Button-1>", self.cycle_label_text)
-        self.label.pack()
+def get_pos(event):
+    global xwin
+    global ywin
 
-        self.greet_button = Button(master, text="Greet", command=self.greet)
-        self.greet_button.pack()
+    xwin = event.x
+    ywin = event.y
 
-        self.close_button = Button(master, text="Close", command=master.quit)
-        self.close_button.pack()
+def move_window(event):
+    root.geometry(f'+{event.x_root - xwin}+{event.y_root - ywin}')
 
-    def greet(self):
-        print("Greetings!")
+def change_on_hovering(event):
+    close_button['bg'] = 'red'
 
-    def cycle_label_text(self, event):
-        self.label_index += 1
-        self.label_index %= len(self.LABEL_TEXT)  # wrap around
-        self.label_text.set(self.LABEL_TEXT[self.label_index])
+def return_to_normal_state(event):
+    close_button['bg'] = back_ground
 
+# --- main ---
 
-root = Tk()
-my_gui = MyFirstGUI(root)
+# set background color of title bar
+back_ground = "#2c2c2c"
+# set background of window
+content_color = "#ffffff"
+
+# ---
+
+root = tk.Tk()
+# turns off title bar, geometry
+root.overrideredirect(True)
+
+# set new geometry
+root.geometry('400x100+200+200')
+
+# make a frame for the title bar
+title_bar = tk.Frame(root, bg=back_ground, relief='raised', bd=1, 
+                     highlightcolor=back_ground, 
+                     highlightthickness=0)
+
+# put a close button on the title bar
+close_button = tk.Button(title_bar, text='x', bg=back_ground, padx=5, pady=2, 
+                         bd=0, font="bold", fg='white',
+                         activebackground="red",
+                         activeforeground="white", 
+                         highlightthickness=0, 
+                         command=root.destroy)
+                         
+# window title
+title_window = "Title Name"
+title_name = tk.Label(title_bar, text=title_window, bg=back_ground, fg="white")
+
+# a canvas for the main area of the window
+window = tk.Canvas(root, bg="white", highlightthickness=0)
+
+# pack the widgets
+title_bar.pack(expand=True, fill='x')
+title_name.pack(side='left')
+close_button.pack(side='right')
+window.pack(expand=True, fill='both')
+
+# bind title bar motion to the move window function
+title_bar.bind("<B1-Motion>", move_window)
+title_bar.bind("<Button-1>", get_pos)
+close_button.bind('<Enter>', change_on_hovering)
+close_button.bind('<Leave>', return_to_normal_state)
+
 root.mainloop()
