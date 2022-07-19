@@ -1,74 +1,56 @@
-#from tkinter import *  # PEP8: `import *` is not preferred
-import tkinter as tk
+# Imports
+from tkinter import *
+from ctypes import windll
+# Some WindowsOS styles, required for task bar integration
+GWL_EXSTYLE = -20
+WS_EX_APPWINDOW = 0x00040000
+WS_EX_TOOLWINDOW = 0x00000080
 
-# --- classes ---
 
-# empty
+def set_appwindow(mainWindow):
+    # Honestly forgot what most of this stuff does. I think it's so that you can see
+    # the program in the task bar while using overridedirect. Most of it is taken
+    # from a post I found on stackoverflow.
+    hwnd = windll.user32.GetParent(mainWindow.winfo_id())
+    stylew = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+    stylew = stylew & ~WS_EX_TOOLWINDOW
+    stylew = stylew | WS_EX_APPWINDOW
+    res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, stylew)
+    # re-assert the new window style
+    mainWindow.wm_withdraw()
+    mainWindow.after(10, lambda: mainWindow.wm_deiconify())
 
-# --- functions ---
 
-def get_pos(event):
-    global xwin
-    global ywin
+def main():
+    global mainWindow
+    # Default window configuration
+    mainWindow = Tk()
+    mainWindow.geometry('800x400')
+    mainWindow.resizable(width=False, height=False)
+    mainWindow.overrideredirect(True)
+    mainWindow.after(10, lambda: set_appwindow(mainWindow))
 
-    xwin = event.x
-    ywin = event.y
+    def exitGUI():
+        mainWindow.destroy()
 
-def move_window(event):
-    root.geometry(f'+{event.x_root - xwin}+{event.y_root - ywin}')
+    def minimizeGUI():
+        mainWindow.state('withdrawn')
+        mainWindow.overrideredirect(False)
+        mainWindow.state('iconic')
 
-def change_on_hovering(event):
-    close_button['bg'] = 'red'
+    def frameMapped(event=None):
+        mainWindow.overrideredirect(True)
+        mainWindow.state("normal")
+        mainWindow.iconbitmap("ANALOG.ico")
+    exitButton = Button(mainWindow, text='', bg='#212121', fg='#35DAFF',
+                        command=exitGUI)
+    minimizeButton = Button(mainWindow, text='', bg="#212121", fg='#35DAFF',
+                            command=minimizeGUI)
+    exitButton.place(x=780, y=0)
+    minimizeButton.place(x=759, y=0)
+    mainWindow.bind("<Map>", frameMapped)  # This brings back the window
+    mainWindow.mainloop()  # Window Loop
 
-def return_to_normal_state(event):
-    close_button['bg'] = back_ground
 
-# --- main ---
-
-# set background color of title bar
-back_ground = "#2c2c2c"
-# set background of window
-content_color = "#ffffff"
-
-# ---
-
-root = tk.Tk()
-# turns off title bar, geometry
-root.overrideredirect(True)
-
-# set new geometry
-root.geometry('400x100+200+200')
-
-# make a frame for the title bar
-title_bar = tk.Frame(root, bg=back_ground, relief='raised', bd=1, 
-                     highlightcolor=back_ground, 
-                     highlightthickness=0)
-
-# put a close button on the title bar
-close_button = tk.Button(title_bar, text='x', bg=back_ground, padx=5, pady=2, 
-                         bd=0, font="bold", fg='white',
-                         activebackground="red",
-                         activeforeground="white", 
-                         highlightthickness=0, 
-                         command=root.destroy)
-                         
-# window title
-title_window = "Title Name"
-title_name = tk.Label(title_bar, text=title_window, bg=back_ground, fg="white")
-
-# a canvas for the main area of the window
-window = tk.Canvas(root, bg="white", highlightthickness=0)
-
-# pack the widgets
-title_bar.pack(expand=True, fill='x')
-title_name.pack(side='left')
-close_button.pack(side='right')
-window.pack(expand=True, fill='both')
-
-# bind title bar motion to the move window function
-title_bar.bind("<B1-Motion>", move_window)
-title_bar.bind("<Button-1>", get_pos)
-close_button.bind('<Enter>', change_on_hovering)
-close_button.bind('<Leave>', return_to_normal_state)
-
-root.mainloop()
+if __name__ == '__main__':
+    main()
