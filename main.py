@@ -1,18 +1,25 @@
+from tkinter import ttk
+
 import serial
+import sv_ttk
+import voicemeeterlib
 from serial import SerialException
 
-# from voicemeeter import *
 from app import App
 
 # constants
-KIND = 'potato'
+VM_KIND = 'potato'
 
 
 def main():
-    app = App('Voicemeeter Remote')
+    with voicemeeterlib.api(VM_KIND) as vm:
+        app = App(vm, 'Voicemeeter Remote', False)
 
-    app.protocol("WM_DELETE_WINDOW", app.on_closing)
-    app.mainloop()
+        app.tk.call('source', 'azure.tcl')
+        app.tk.call('set_theme', 'dark')
+
+        app.protocol("WM_DELETE_WINDOW", app.on_closing)
+        app.mainloop()
 
 
 if __name__ == "__main__":
